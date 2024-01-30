@@ -1,0 +1,5 @@
+CREATE TABLE UserProfile (
+	user_id INTEGER UNIQUE NOT NULL,
+	name VARCHAR UNIQUE NOT NULL,
+	about_info TEXT,
+)
