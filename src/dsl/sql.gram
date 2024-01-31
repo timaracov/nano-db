@@ -1,0 +1,14 @@
+statement = select_stmt | 
+			 create_table_stmt |
+			 create_index_stmt |
+			 update_stmt |
+			 delete_stmt
+
+select_stmt = "SELECT", " ", select_column_stmt, {separator, select_column_stmt},
+			  "FROM", table_name, {table_name}
+
+select_column_stmt = "*" | literal | (literal, "AS", literal)
+
+separator = ",", [" "]
+
+table_name
