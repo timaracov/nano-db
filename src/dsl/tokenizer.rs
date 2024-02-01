@@ -1,7 +1,8 @@
-use std::collections::HashMap;
 use std::vec::Vec;
+use std::fmt;
 
 
+#[derive(Debug)]
 pub enum TokenType {
     LITERAL, // 'any word'
     STAR,    // '*'
@@ -11,6 +12,12 @@ pub enum TokenType {
     RBRACK,  // ')'
     SEMICOL, // ';'
     ILLEGAL  // "ill"
+}
+
+impl fmt::Display for TokenType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Debug::fmt(self, f)
+    }
 }
 
 pub struct Token {
@@ -26,32 +33,76 @@ pub struct Lexer {
     pub source_string: String,
 }
 
-let TOKEN_TABLE: HashMap<&str, TokenType> = HashMap::from([
-    ("*", TokenType::STAR),
-]);
-
 impl Lexer {
-    pub fn tokenize(&mut self) {
-        let mut tokens = Vec::new();
-        for c in self.source_string.chars() {
+    pub fn tokenize(&mut self) -> Vec<Token> {
+        let mut tokens: Vec<Token> = Vec::new();
+        let mut c = self.next_char();
+        while usize::from(self.pos) < self.source_string.len() {
             let start_pos = self.pos;
-            if c.is_alphabetic() {
-                let literal = self.build_literal();
-                tokens.push(Token {
-                    t_type: TokenType::LITERAL,
-                    value: literal,
-                    end_pos: self.pos,
-                    start_pos
-                });
-            } else {
-                tokens.push(Token {
-                    t_type: TokenType::ILLEGAL,
-                    value: "illegal".to_string(),
-                    end_pos: self.pos,
-                    start_pos
-                })
-            }
+            println!("__start again__");
+            let tok = match c {
+               '*' => Token {
+                   t_type: TokenType::STAR,
+                   value: "*".to_string(),
+                   start_pos: self.pos,
+                   end_pos: self.pos
+                },
+               ' ' => Token {
+                   t_type: TokenType::SPACE,
+                   value: c.to_string(),
+                   start_pos: self.pos,
+                   end_pos: self.pos
+                },
+               ',' => Token {
+                   t_type: TokenType::COMA,
+                   value: c.to_string(),
+                   start_pos: self.pos,
+                   end_pos: self.pos
+                },
+               ';' => Token {
+                   t_type: TokenType::SEMICOL,
+                   value: c.to_string(),
+                   start_pos: self.pos,
+                   end_pos: self.pos
+                },
+               '(' => Token {
+                   t_type: TokenType::LBRACK,
+                   value: c.to_string(),
+                   start_pos: self.pos,
+                   end_pos: self.pos
+                },
+               ')' => Token {
+                   t_type: TokenType::RBRACK,
+                   value: c.to_string(),
+                   start_pos: self.pos,
+                   end_pos: self.pos
+                },
+               _ => {
+                println!("wtf:{}", c);
+                if c.is_alphabetic() {
+                    let literal = self.build_literal();
+                    Token {
+                        t_type: TokenType::LITERAL,
+                        value: literal,
+                        end_pos: self.pos,
+                        start_pos: start_pos,
+                    }
+                } else {
+                    Token {
+                        t_type: TokenType::ILLEGAL,
+                        value: "ill".to_string(),
+                        start_pos: self.pos,
+                        end_pos: self.pos
+                    }
+                }
+               }
+            };
+            println!(".({}, '{}', {}-{})", tok.t_type, tok.value, tok.start_pos, tok.end_pos);
+            tokens.push(tok);
+            self.pos += 1;
+            c = self.next_char();
         }
+        return tokens;
     }
 
     fn build_literal(&mut self) -> String {
@@ -59,21 +110,21 @@ impl Lexer {
         let mut c = self.next_char();
 
         while c.is_alphabetic() {
-            let prep_c = self.char_to_str(c);
-            literal.push_str(prep_c);
+            literal.push(c);
             self.pos += 1;
             c = self.next_char();
         }
+        self.pos -= 1;
         return literal;
     }
 
-    fn next_char(self) -> char {
-        return self.source_string.chars().nth(self.pos.into()).unwrap();
+    fn next_char(&self) -> char {
+        self.source_string
+            .chars()
+            .nth(self.pos.into())
+            .unwrap()
     }
 
-    fn char_to_str(self, c: char) -> &'static str {
-        return c.to_string().as_str();
-    }
 }
 
 // select * from ...
