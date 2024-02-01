@@ -4,14 +4,15 @@ use std::fmt;
 
 #[derive(Debug)]
 pub enum TokenType {
-    LITERAL, // 'any word'
-    STAR,    // '*'
-    SPACE,   // ' '
-    COMA,    // ','
-    LBRACK,  // '('
-    RBRACK,  // ')'
-    SEMICOL, // ';'
-    ILLEGAL  // "ill"
+    KEYWORD,
+    LITERAL,
+    STAR,
+    SPACE,
+    COMA,
+    LBRACK,
+    RBRACK,
+    SEMICOL,
+    // ILLEGAL 
 }
 
 impl fmt::Display for TokenType {
@@ -19,6 +20,13 @@ impl fmt::Display for TokenType {
         fmt::Debug::fmt(self, f)
     }
 }
+
+static KEYWORDS: &'static [&str] = &[
+    "select",
+    "update",
+    "delete",
+    "from",
+];
 
 pub struct Token {
     t_type: TokenType,
@@ -36,10 +44,9 @@ pub struct Lexer {
 impl Lexer {
     pub fn tokenize(&mut self) -> Vec<Token> {
         let mut tokens: Vec<Token> = Vec::new();
-        let mut c = self.next_char();
         while usize::from(self.pos) < self.source_string.len() {
             let start_pos = self.pos;
-            println!("__start again__");
+            let c = self.next_char();
             let tok = match c {
                '*' => Token {
                    t_type: TokenType::STAR,
@@ -78,29 +85,36 @@ impl Lexer {
                    end_pos: self.pos
                 },
                _ => {
-                println!("wtf:{}", c);
                 if c.is_alphabetic() {
                     let literal = self.build_literal();
+
+                    let tt;
+                    if KEYWORDS.contains(&literal.as_str()) {
+                        tt = TokenType::KEYWORD;
+                    } else {
+                        tt = TokenType::LITERAL;
+                    }
+
                     Token {
-                        t_type: TokenType::LITERAL,
+                        t_type: tt,
                         value: literal,
                         end_pos: self.pos,
-                        start_pos: start_pos,
+                        start_pos
                     }
                 } else {
-                    Token {
-                        t_type: TokenType::ILLEGAL,
-                        value: "ill".to_string(),
-                        start_pos: self.pos,
-                        end_pos: self.pos
-                    }
+                    panic!("\n\tInvalid character '{}' at position: {}", c, self.pos);
+                    // Token {
+                    //     t_type: TokenType::ILLEGAL,
+                    //     value: "ill".to_string(),
+                    //     start_pos: self.pos,
+                    //     end_pos: self.pos
+                    // }
                 }
                }
             };
             println!(".({}, '{}', {}-{})", tok.t_type, tok.value, tok.start_pos, tok.end_pos);
             tokens.push(tok);
             self.pos += 1;
-            c = self.next_char();
         }
         return tokens;
     }
@@ -124,7 +138,6 @@ impl Lexer {
             .nth(self.pos.into())
             .unwrap()
     }
-
 }
 
 // select * from ...
