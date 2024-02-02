@@ -12,6 +12,13 @@ pub enum TokenType {
     RPAREN(String),     // )
     SEMICOL(String),    // ;
     ENDLN(String),      // \n
+    EQ(String),         // =
+    LT(String),         // <
+    GT(String),         // >
+    NE(String),         // !=
+    LTE(String),        // <=
+    GTE(String),        // >=
+    SQM(String)         // "'"
 }
 
 impl fmt::Display for TokenType {
@@ -157,6 +164,12 @@ impl Lexer {
                     t_type: TokenType::SPACE(String::from(" ")),
                     start_pos: self.pos,
                     end_pos: self.pos,
+
+                },
+                "\'".as_char() => Token {
+                    t_type: TokenType::SQM(String::from("'")),
+                    start_pos: self.pos,
+                    end_pos: self.pos,
                 },
                 ',' => Token {
                     t_type: TokenType::COMA(String::from(",")),
@@ -182,6 +195,76 @@ impl Lexer {
                     t_type: TokenType::ENDLN(String::from("\n")),
                     start_pos: self.pos,
                     end_pos: self.pos,
+                },
+                '=' => Token {
+                    t_type: TokenType::EQ(String::from("=")),
+                    start_pos: self.pos,
+                    end_pos: self.pos,
+                },
+                '>' => {
+                    self.pos += 1;
+                    let c = self.next_char();
+                    match c {
+                        '=' => Token { 
+                            t_type: TokenType::GTE(String::from(">=")),
+                            start_pos: self.pos-1,
+                            end_pos: self.pos,
+                        },
+                        ' ' =>  {
+                            self.pos -= 1;
+                            Token { 
+                                t_type: TokenType::GT(String::from(">")),
+                                start_pos: self.pos,
+                                end_pos: self.pos,
+                            }
+                        },
+
+                        _ => {
+                            self.token_panic(c);
+                            panic!();
+                        }
+                    }
+                },
+                '<' => {
+                    self.pos += 1;
+                    let c = self.next_char();
+                    match c {
+                        '=' => Token { 
+                            t_type: TokenType::LTE(String::from("<=")),
+                            start_pos: self.pos-1,
+                            end_pos: self.pos,
+                        },
+                        ' ' =>  {
+                            self.pos -= 1;
+                            Token { 
+                                t_type: TokenType::LT(String::from("<")),
+                                start_pos: self.pos,
+                                end_pos: self.pos,
+                            }
+                        },
+
+                        _ => {
+                            self.pos -= 1;
+                            self.token_panic(c);
+                            panic!();
+                        }
+                    }
+                },
+                '!' => {
+                    self.pos += 1;
+                    let c = self.next_char();
+                    match c {
+                        '=' => Token { 
+                            t_type: TokenType::NE(String::from("!=")),
+                            start_pos: self.pos-1,
+                            end_pos: self.pos,
+                        },
+                        _ => {
+                            self.pos -= 1;
+                            self.token_panic(c);
+                            panic!();
+                        }
+                    }
                 },
                 _ => {
                     if c.is_alphabetic() {
