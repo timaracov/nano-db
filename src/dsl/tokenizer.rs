@@ -12,7 +12,6 @@ pub enum TokenType {
     LBRACK,
     RBRACK,
     SEMICOL,
-    // ILLEGAL 
 }
 
 impl fmt::Display for TokenType {
@@ -26,6 +25,13 @@ static KEYWORDS: &'static [&str] = &[
     "update",
     "delete",
     "from",
+    "order",
+    "by",
+    "group",
+    "union",
+    "join",
+    "varchar",
+    "varchar",
 ];
 
 pub struct Token {
@@ -36,12 +42,18 @@ pub struct Token {
 }
 
 pub struct Lexer {
-    pub pos: u8,
-    pub current_char: String,
-    pub source_string: String,
+    pos: u8,
+    source_string: String,
 }
 
 impl Lexer {
+    pub fn new(src: &String) -> Lexer {
+        return Self {
+            source_string: src.to_lowercase(),
+            pos: 0,
+        }
+    }
+
     pub fn tokenize(&mut self) -> Vec<Token> {
         let mut tokens: Vec<Token> = Vec::new();
         while usize::from(self.pos) < self.source_string.len() {
@@ -103,12 +115,6 @@ impl Lexer {
                     }
                 } else {
                     panic!("\n\tInvalid character '{}' at position: {}", c, self.pos);
-                    // Token {
-                    //     t_type: TokenType::ILLEGAL,
-                    //     value: "ill".to_string(),
-                    //     start_pos: self.pos,
-                    //     end_pos: self.pos
-                    // }
                 }
                }
             };
@@ -137,6 +143,10 @@ impl Lexer {
             .chars()
             .nth(self.pos.into())
             .unwrap()
+    }
+
+    fn print_token_err(&self, pos: usize) {
+        println!("{}", self.source_string);
     }
 }
 
