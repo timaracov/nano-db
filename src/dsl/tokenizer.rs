@@ -1,17 +1,17 @@
-use std::vec::Vec;
 use std::fmt;
+use std::vec::Vec;
 
-
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum TokenType {
-    KEYWORD,
-    LITERAL,
-    STAR,
-    SPACE,
-    COMA,
-    LBRACK,
-    RBRACK,
-    SEMICOL,
+    KEYWORD(String),    // keyword
+    LITERAL(String),    // literal
+    STAR(String),       // *
+    SPACE(String),      // ' '
+    COMA(String),       // ,
+    LPAREN(String),     // (
+    RPAREN(String),     // )
+    SEMICOL(String),    // ;
+    ENDLN(String),      // \n
 }
 
 impl fmt::Display for TokenType {
@@ -22,23 +22,111 @@ impl fmt::Display for TokenType {
 
 static KEYWORDS: &'static [&str] = &[
     "select",
-    "update",
     "delete",
     "from",
     "order",
-    "by",
     "group",
     "union",
+    "not",
+    "or",
+    "is",
+    // types
+    "varchar",
+    "date",
+    "numeric",
+    "text",
+    // end
+    "primary",
+    "add",
+    "constraint",
+    "all",
+    "alter",
+    "column",
+    "and",
+    "any",
+    "as",
+    "asc",
+    "backup",
+    "database",
+    "between",
+    "case",
+    "check",
+    "column",
+    "constraint",
+    "database",
+    "index",
+    "table",
+    "unique",
+    "index",
+    "create",
+    "view",
+    "database",
+    "default",
+    "desc",
+    "distinct",
+    "column",
+    "constraint",
+    "database",
+    "default",
+    "index",
+    "drop",
+    "view",
+    "exists",
+    "foreign",
+    "key",
+    "from",
+    "full",
+    "outer",
+    "group",
+    "having",
+    "in",
+    "index",
+    "inner",
+    "insert",
+    "into",
+    "insert",
+    "into",
+    "is",
+    "null",
+    "is",
+    "not",
+    "null",
+    "left",
     "join",
-    "varchar",
-    "varchar",
+    "like",
+    "limit",
+    "not",
+    "not",
+    "null",
+    "or",
+    "order",
+    "by",
+    "outer",
+    "primary",
+    "procedure",
+    "a",
+    "right",
+    "rownum",
+    "distinct",
+    "into",
+    "top",
+    "set",
+    "top",
+    "truncate",
+    "union",
+    "union",
+    "all",
+    "update",
+    "values",
+    "view",
+    "where",
 ];
 
+#[derive(PartialEq, Debug)]
 pub struct Token {
-    t_type: TokenType,
-    value: String,
-    start_pos: u8,
-    end_pos: u8,
+    pub t_type: TokenType,
+    pub start_pos: u8,
+    pub end_pos: u8,
 }
 
 pub struct Lexer {
@@ -51,7 +139,7 @@ impl Lexer {
         return Self {
             source_string: src.to_lowercase(),
             pos: 0,
-        }
+        };
     }
 
     pub fn tokenize(&mut self) -> Vec<Token> {
@@ -60,65 +148,67 @@ impl Lexer {
             let start_pos = self.pos;
             let c = self.next_char();
             let tok = match c {
-               '*' => Token {
-                   t_type: TokenType::STAR,
-                   value: "*".to_string(),
-                   start_pos: self.pos,
-                   end_pos: self.pos
+                '*' => Token {
+                    t_type: TokenType::STAR(String::from("*")),
+                    start_pos: self.pos,
+                    end_pos: self.pos,
                 },
-               ' ' => Token {
-                   t_type: TokenType::SPACE,
-                   value: c.to_string(),
-                   start_pos: self.pos,
-                   end_pos: self.pos
+                ' ' => Token {
+                    t_type: TokenType::SPACE(String::from(" ")),
+                    start_pos: self.pos,
+                    end_pos: self.pos,
                 },
-               ',' => Token {
-                   t_type: TokenType::COMA,
-                   value: c.to_string(),
-                   start_pos: self.pos,
-                   end_pos: self.pos
+                ',' => Token {
+                    t_type: TokenType::COMA(String::from(",")),
+                    start_pos: self.pos,
+                    end_pos: self.pos,
                 },
-               ';' => Token {
-                   t_type: TokenType::SEMICOL,
-                   value: c.to_string(),
-                   start_pos: self.pos,
-                   end_pos: self.pos
+                ';' => Token {
+                    t_type: TokenType::SEMICOL(String::from(";")),
+                    start_pos: self.pos,
+                    end_pos: self.pos,
                 },
-               '(' => Token {
-                   t_type: TokenType::LBRACK,
-                   value: c.to_string(),
-                   start_pos: self.pos,
-                   end_pos: self.pos
+                '(' => Token {
+                    t_type: TokenType::LPAREN(String::from("(")),
+                    start_pos: self.pos,
+                    end_pos: self.pos,
                 },
-               ')' => Token {
-                   t_type: TokenType::RBRACK,
-                   value: c.to_string(),
-                   start_pos: self.pos,
-                   end_pos: self.pos
+                ')' => Token {
+                    t_type: TokenType::RPAREN(String::from(")")),
+                    start_pos: self.pos,
+                    end_pos: self.pos,
                 },
-               _ => {
-                if c.is_alphabetic() {
-                    let literal = self.build_literal();
+                '\n' => Token {
+                    t_type: TokenType::ENDLN(String::from("\n")),
+                    start_pos: self.pos,
+                    end_pos: self.pos,
+                },
+                _ => {
+                    if c.is_alphabetic() {
+                        let literal = self.build_literal();
 
-                    let tt;
-                    if KEYWORDS.contains(&literal.as_str()) {
-                        tt = TokenType::KEYWORD;
+                        let tt;
+                        if KEYWORDS.contains(&literal.as_str()) {
+                            tt = TokenType::KEYWORD(literal);
+                        } else {
+                            tt = TokenType::LITERAL(literal);
+                        }
+
+                        Token {
+                            t_type: tt,
+                            end_pos: self.pos,
+                            start_pos,
+                        }
                     } else {
-                        tt = TokenType::LITERAL;
+                        self.token_panic(c);
+                        panic!();
                     }
-
-                    Token {
-                        t_type: tt,
-                        value: literal,
-                        end_pos: self.pos,
-                        start_pos
-                    }
-                } else {
-                    panic!("\n\tInvalid character '{}' at position: {}", c, self.pos);
                 }
-               }
             };
-            println!(".({}, '{}', {}-{})", tok.t_type, tok.value, tok.start_pos, tok.end_pos);
+            println!(
+                ".({}, {}-{})",
+                tok.t_type, tok.start_pos, tok.end_pos
+            );
             tokens.push(tok);
             self.pos += 1;
         }
@@ -139,15 +229,22 @@ impl Lexer {
     }
 
     fn next_char(&self) -> char {
-        self.source_string
-            .chars()
-            .nth(self.pos.into())
-            .unwrap()
+        self.source_string.chars().nth(self.pos.into()).unwrap()
     }
 
-    fn print_token_err(&self, pos: usize) {
-        println!("{}", self.source_string);
+    fn token_panic(&self, c: char) {
+        println!("\"{}\"", self.source_string);
+        for _ in 0..=self.pos {
+            print!(" ");
+        }
+        print!("▲\n");
+        for _ in 0..=self.pos {
+            print!(" ");
+        }
+        print!("|\n");
+        for _ in 0..=self.pos {
+            print!(" ");
+        }
+        print!("Invalid character '{}' at position: {}\n\n", c, self.pos);
     }
 }
-
-// select * from ...
