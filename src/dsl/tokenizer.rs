@@ -18,7 +18,7 @@ pub enum TokenType {
     NE(String),         // !=
     LTE(String),        // <=
     GTE(String),        // >=
-    SQM(String)         // "'"
+    DQM(String)         // '"'
 }
 
 impl fmt::Display for TokenType {
@@ -166,8 +166,8 @@ impl Lexer {
                     end_pos: self.pos,
 
                 },
-                "\'".as_char() => Token {
-                    t_type: TokenType::SQM(String::from("'")),
+                '"' => Token {
+                    t_type: TokenType::DQM('"'.to_string()),
                     start_pos: self.pos,
                     end_pos: self.pos,
                 },
