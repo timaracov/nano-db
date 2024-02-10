@@ -1,18 +1,34 @@
 use super::tokenizer::Lexer;
 
-enum Statement {Expression}
+struct QueryExpr {}
 
-
-struct AbstractAstNode {
-    value: Statement,
+struct SelectQuery {
+    columns: &str[]
 }
 
-struct AbstractTree {}
+pub struct AbstractTree {
+    query: QueryExpr
+}
 
+pub struct Parser {
+    lex: Lexer
+}
 
-impl AbstractTree {
-    fn build(lex: &mut Lexer) -> AbstractTree {
-        let mut lx = lex.tokenize();
-        return Self{};
+impl Parser {
+    pub fn new(lex: Lexer) -> Parser {
+        return Self{lex}
+    }
+
+    pub fn parse(&mut self) -> AbstractTree { 
+        let tokens = self.lex.tokenize();
+        for token in tokens {
+            println!(
+                ".({}, {}-{})",
+                token.t_type, token.start_pos, token.end_pos
+            );
+        }
+        AbstractTree {
+            query: QueryExpr {}
+        }
     }
 }

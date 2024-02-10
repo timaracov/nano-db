@@ -1,8 +1,10 @@
 mod dsl;
 
+
 fn main() {
-    let mut lx = dsl::tokenizer::Lexer::new(
+    let lx = dsl::tokenizer::Lexer::new(
         &String::from("select * from table where name = \"Jhon\"\norder by id;")
     );
-    lx.tokenize();
+    let mut ast_tree = dsl::ast::Parser::new(lx);
+    ast_tree.parse();
 }

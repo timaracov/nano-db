@@ -288,10 +288,6 @@ impl Lexer {
                     }
                 }
             };
-            println!(
-                ".({}, {}-{})",
-                tok.t_type, tok.start_pos, tok.end_pos
-            );
             tokens.push(tok);
             self.pos += 1;
         }
