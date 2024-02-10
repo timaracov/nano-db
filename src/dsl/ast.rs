@@ -1,10 +1,11 @@
 use super::tokenizer::{Lexer, TokenType};
 
+
 #[derive(Debug)]
 pub struct AbstractTree {}
 
 pub struct Parser {
-    lex: Lexer
+    lex: Lexer,
 }
 
 impl Parser {

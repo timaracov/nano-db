@@ -6,11 +6,10 @@ struct Schema {
     cols: [Column]
 }
 
-struct Table {
+pub struct Table {
     schema: Schema,
 }
 
 impl Table {
-    pub fn select_data() {
-    }
+    pub fn select_data() {}
 }
