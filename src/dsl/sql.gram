@@ -1,14 +1,38 @@
-statement = select_stmt | 
-			 create_table_stmt |
-			 create_index_stmt |
-			 update_stmt |
-			 delete_stmt
+# EBNF notation
 
-select_stmt = "SELECT", " ", select_column_stmt, {separator, select_column_stmt},
-			  "FROM", table_name, {table_name}
+statement = select_stmt 
+			| create_table_stmt 
+			| create_index_stmt 
+			| update_stmt 
+			| drop_stmt
 
-select_column_stmt = "*" | literal | (literal, "AS", literal)
+select_stmt = select_column_stmt,
+			  from_stmt,
+			  [group_by_stmt],
+			  [order_by_stmt],
+			  [where_stmt],
+			  [having_stmt],
+			  [join_stmt],
+			  [union_stmt]
+
+create_table_stmt = "CREATE", " ", "TABLE", identifier
+
+create_index_stmt = ...
+update_stmt = ...
+drop_stmt = ...
+
+from_stmt = "FROM", identifier, {identifier}
+
+select_column_stmt = "SELECT", " ", column_stmt
+
+column_stmt = column, {separator, column}
+
+column = "*" | identifier | (identifier, "AS", identifier)
 
 separator = ",", [" "]
 
-table_name
+identifier = (letter | "_"), {letter | digit | "_"}
+
+letter = "a" | ... | "z" | "A" | ... | "Z"
+
+digit = 0 | ... | 9

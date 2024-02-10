@@ -1,14 +1,7 @@
-use super::tokenizer::Lexer;
+use super::tokenizer::{Lexer, TokenType};
 
-struct QueryExpr {}
-
-struct SelectQuery {
-    columns: &str[]
-}
-
-pub struct AbstractTree {
-    query: QueryExpr
-}
+#[derive(Debug)]
+pub struct AbstractTree {}
 
 pub struct Parser {
     lex: Lexer
@@ -20,15 +13,17 @@ impl Parser {
     }
 
     pub fn parse(&mut self) -> AbstractTree { 
-        let tokens = self.lex.tokenize();
-        for token in tokens {
-            println!(
-                ".({}, {}-{})",
-                token.t_type, token.start_pos, token.end_pos
-            );
-        }
-        AbstractTree {
-            query: QueryExpr {}
+        let token = self.lex.next();
+        println!("{}", token.t_type);
+        AbstractTree {}
+    }
+
+    pub fn match_pattern(&mut self, pattern: &[TokenType]) {
+        for tt in pattern {
+            let tok = self.lex.next();
+            if tt != &tok.t_type {
+                break;
+            }
         }
     }
 }

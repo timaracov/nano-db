@@ -1,5 +1,4 @@
 use std::fmt;
-use std::vec::Vec;
 
 #[derive(Debug, PartialEq)]
 pub enum TokenType {
@@ -149,149 +148,145 @@ impl Lexer {
         };
     }
 
-    pub fn tokenize(&mut self) -> Vec<Token> {
-        let mut tokens: Vec<Token> = Vec::new();
-        while usize::from(self.pos) < self.source_string.len() {
-            let start_pos = self.pos;
-            let c = self.next_char();
-            let tok = match c {
-                '*' => Token {
-                    t_type: TokenType::STAR(String::from("*")),
-                    start_pos: self.pos,
-                    end_pos: self.pos,
-                },
-                ' ' => Token {
-                    t_type: TokenType::SPACE(String::from(" ")),
-                    start_pos: self.pos,
-                    end_pos: self.pos,
+    pub fn next(&mut self) -> Token {
+        let start_pos = self.pos;
+        let c = self.next_char();
+        let tok = match c {
+            '*' => Token {
+                t_type: TokenType::STAR(String::from("*")),
+                start_pos: self.pos,
+                end_pos: self.pos,
+            },
+            ' ' => Token {
+                t_type: TokenType::SPACE(String::from(" ")),
+                start_pos: self.pos,
+                end_pos: self.pos,
 
-                },
-                '"' => Token {
-                    t_type: TokenType::DQM('"'.to_string()),
-                    start_pos: self.pos,
-                    end_pos: self.pos,
-                },
-                ',' => Token {
-                    t_type: TokenType::COMA(String::from(",")),
-                    start_pos: self.pos,
-                    end_pos: self.pos,
-                },
-                ';' => Token {
-                    t_type: TokenType::SEMICOL(String::from(";")),
-                    start_pos: self.pos,
-                    end_pos: self.pos,
-                },
-                '(' => Token {
-                    t_type: TokenType::LPAREN(String::from("(")),
-                    start_pos: self.pos,
-                    end_pos: self.pos,
-                },
-                ')' => Token {
-                    t_type: TokenType::RPAREN(String::from(")")),
-                    start_pos: self.pos,
-                    end_pos: self.pos,
-                },
-                '\n' => Token {
-                    t_type: TokenType::ENDLN(String::from("\n")),
-                    start_pos: self.pos,
-                    end_pos: self.pos,
-                },
-                '=' => Token {
-                    t_type: TokenType::EQ(String::from("=")),
-                    start_pos: self.pos,
-                    end_pos: self.pos,
-                },
-                '>' => {
-                    self.pos += 1;
-                    let c = self.next_char();
-                    match c {
-                        '=' => Token { 
-                            t_type: TokenType::GTE(String::from(">=")),
-                            start_pos: self.pos-1,
+            },
+            '"' => Token {
+                t_type: TokenType::DQM('"'.to_string()),
+                start_pos: self.pos,
+                end_pos: self.pos,
+            },
+            ',' => Token {
+                t_type: TokenType::COMA(String::from(",")),
+                start_pos: self.pos,
+                end_pos: self.pos,
+            },
+            ';' => Token {
+                t_type: TokenType::SEMICOL(String::from(";")),
+                start_pos: self.pos,
+                end_pos: self.pos,
+            },
+            '(' => Token {
+                t_type: TokenType::LPAREN(String::from("(")),
+                start_pos: self.pos,
+                end_pos: self.pos,
+            },
+            ')' => Token {
+                t_type: TokenType::RPAREN(String::from(")")),
+                start_pos: self.pos,
+                end_pos: self.pos,
+            },
+            '\n' => Token {
+                t_type: TokenType::ENDLN(String::from("\n")),
+                start_pos: self.pos,
+                end_pos: self.pos,
+            },
+            '=' => Token {
+                t_type: TokenType::EQ(String::from("=")),
+                start_pos: self.pos,
+                end_pos: self.pos,
+            },
+            '>' => {
+                self.pos += 1;
+                let c = self.next_char();
+                match c {
+                    '=' => Token { 
+                        t_type: TokenType::GTE(String::from(">=")),
+                        start_pos: self.pos-1,
+                        end_pos: self.pos,
+                    },
+                    ' ' =>  {
+                        self.pos -= 1;
+                        Token { 
+                            t_type: TokenType::GT(String::from(">")),
+                            start_pos: self.pos,
                             end_pos: self.pos,
-                        },
-                        ' ' =>  {
-                            self.pos -= 1;
-                            Token { 
-                                t_type: TokenType::GT(String::from(">")),
-                                start_pos: self.pos,
-                                end_pos: self.pos,
-                            }
-                        },
+                        }
+                    },
 
-                        _ => {
-                            self.token_panic(c);
-                            panic!();
-                        }
-                    }
-                },
-                '<' => {
-                    self.pos += 1;
-                    let c = self.next_char();
-                    match c {
-                        '=' => Token { 
-                            t_type: TokenType::LTE(String::from("<=")),
-                            start_pos: self.pos-1,
-                            end_pos: self.pos,
-                        },
-                        ' ' =>  {
-                            self.pos -= 1;
-                            Token { 
-                                t_type: TokenType::LT(String::from("<")),
-                                start_pos: self.pos,
-                                end_pos: self.pos,
-                            }
-                        },
-
-                        _ => {
-                            self.pos -= 1;
-                            self.token_panic(c);
-                            panic!();
-                        }
-                    }
-                },
-                '!' => {
-                    self.pos += 1;
-                    let c = self.next_char();
-                    match c {
-                        '=' => Token { 
-                            t_type: TokenType::NE(String::from("!=")),
-                            start_pos: self.pos-1,
-                            end_pos: self.pos,
-                        },
-                        _ => {
-                            self.pos -= 1;
-                            self.token_panic(c);
-                            panic!();
-                        }
-                    }
-                },
-                _ => {
-                    if c.is_alphabetic() {
-                        let literal = self.build_literal();
-
-                        let tt;
-                        if KEYWORDS.contains(&literal.as_str()) {
-                            tt = TokenType::KEYWORD(literal);
-                        } else {
-                            tt = TokenType::LITERAL(literal);
-                        }
-
-                        Token {
-                            t_type: tt,
-                            end_pos: self.pos,
-                            start_pos,
-                        }
-                    } else {
+                    _ => {
                         self.token_panic(c);
                         panic!();
                     }
                 }
-            };
-            tokens.push(tok);
-            self.pos += 1;
-        }
-        return tokens;
+            },
+            '<' => {
+                self.pos += 1;
+                let c = self.next_char();
+                match c {
+                    '=' => Token { 
+                        t_type: TokenType::LTE(String::from("<=")),
+                        start_pos: self.pos-1,
+                        end_pos: self.pos,
+                    },
+                    ' ' =>  {
+                        self.pos -= 1;
+                        Token { 
+                            t_type: TokenType::LT(String::from("<")),
+                            start_pos: self.pos,
+                            end_pos: self.pos,
+                        }
+                    },
+
+                    _ => {
+                        self.pos -= 1;
+                        self.token_panic(c);
+                        panic!();
+                    }
+                }
+            },
+            '!' => {
+                self.pos += 1;
+                let c = self.next_char();
+                match c {
+                    '=' => Token { 
+                        t_type: TokenType::NE(String::from("!=")),
+                        start_pos: self.pos-1,
+                        end_pos: self.pos,
+                    },
+                    _ => {
+                        self.pos -= 1;
+                        self.token_panic(c);
+                        panic!();
+                    }
+                }
+            },
+            _ => {
+                if c.is_alphabetic() {
+                    let literal = self.build_literal();
+
+                    let tt;
+                    if KEYWORDS.contains(&literal.as_str()) {
+                        tt = TokenType::KEYWORD(literal);
+                    } else {
+                        tt = TokenType::LITERAL(literal);
+                    }
+
+                    Token {
+                        t_type: tt,
+                        end_pos: self.pos,
+                        start_pos,
+                    }
+                } else {
+                    self.token_panic(c);
+                    panic!();
+                }
+            }
+        };
+        self.pos += 1;
+        tok
     }
 
     fn build_literal(&mut self) -> String {
