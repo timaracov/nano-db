@@ -1,5 +1,6 @@
 mod dsl;
 mod storage;
+mod vm;
 
 
 fn main() {
